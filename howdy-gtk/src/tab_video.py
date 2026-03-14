@@ -31,7 +31,7 @@ def on_page_switch(self, notebook, page, page_num):
 			print(_("Can't import OpenCV2"))
 
 		try:
-			self.capture = cv2.VideoCapture(path)
+			self.capture = cv2.VideoCapture(path, cv2.CAP_V4L2)
 		except Exception:
 			print(_("Can't open camera"))
 
@@ -67,15 +67,18 @@ def capture_frame(self):
 
 	ret, frame = self.capture.read()
 
+	if not ret or frame is None:
+		gobject.timeout_add(50, self.capture_frame)
+		return
+
+	frame = self.cv2.cvtColor(frame, self.cv2.COLOR_BGR2RGB)
 	frame = self.cv2.resize(frame, None, fx=self.scaling_factor, fy=self.scaling_factor, interpolation=self.cv2.INTER_AREA)
 
-	retval, buffer = self.cv2.imencode(".png", frame)
+	h, w, ch = frame.shape
+	buf = pixbuf.Pixbuf.new_from_data(
+		frame.tobytes(), pixbuf.Colorspace.RGB, False, 8, w, h, w * ch
+	)
 
-	loader = pixbuf.PixbufLoader()
-	loader.write(buffer)
-	loader.close()
-	buffer = loader.get_pixbuf()
-
-	self.opencvimage.set_from_pixbuf(buffer)
+	self.opencvimage.set_from_pixbuf(buf)
 
 	gobject.timeout_add(20, self.capture_frame)

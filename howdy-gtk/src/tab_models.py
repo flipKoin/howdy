@@ -51,6 +51,7 @@ def on_model_add(self, button):
 	dialog = gtk.MessageDialog(parent=self, flags=gtk.DialogFlags.MODAL, type=gtk.MessageType.QUESTION, buttons=gtk.ButtonsType.OK_CANCEL)
 	dialog.set_title(_("Confirm Model Creation"))
 	dialog.props.text = _("Please enter a name for the new model, 24 characters max")
+	dialog.format_secondary_text(_("This is a label to help you identify each face scan (e.g. \"daytime\", \"evening\", \"glasses on\"). You can leave it blank for a default name."))
 
 	# Create the input field
 	entry = gtk.Entry()
